@@ -1,6 +1,9 @@
 {
   "dataDir": "data",
   "catalog": "manifest/catalog.jsonl",
+  "optimized": "manifest/optimized.jsonl",
+  "optimizeDir": "data/opt",
+  "thumbDir": "data/thumb",
   "indexDir": "index",
   "taxonomy": "manifest/taxonomy.json",
   "upstreams": "manifest/upstreams.json",

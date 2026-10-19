@@ -5,12 +5,13 @@
 //   node tools/pick.mjs --usage banner --format list
 //   node tools/pick.mjs --for 门下封驳            # 场景别名，同 --scene
 import { ROOT, parseArgs, multi } from "../lib/cli.mjs";
-import { loadConfig, loadTaxonomy, loadCatalog, pick, render } from "../lib/kb.mjs";
+import { loadConfig, loadTaxonomy, loadCatalog, loadOptimized, applyOptimized, pick, render } from "../lib/kb.mjs";
 
 const args = parseArgs(process.argv.slice(2));
 const cfg = loadConfig(ROOT);
 const taxo = loadTaxonomy(ROOT, cfg);
-const entries = loadCatalog(ROOT, cfg);
+// 默认用压缩后的 WebP（体积小一个数量级）；要看原图加 --raw
+const entries = applyOptimized(loadCatalog(ROOT, cfg), loadOptimized(ROOT, cfg), { raw: Boolean(args.raw) });
 
 const scene = multi(args.scene ?? args.for);
 const query = {

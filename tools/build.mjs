@@ -2,12 +2,13 @@
 import fs from "node:fs";
 import path from "node:path";
 import { ROOT } from "../lib/cli.mjs";
-import { loadConfig, loadTaxonomy, loadCatalog, buildIndex } from "../lib/kb.mjs";
+import { loadConfig, loadTaxonomy, loadCatalog, loadOptimized, buildIndex } from "../lib/kb.mjs";
 
 const cfg = loadConfig(ROOT);
 const taxo = loadTaxonomy(ROOT, cfg);
 const entries = loadCatalog(ROOT, cfg);
-const index = buildIndex(entries, taxo);
+const optMap = loadOptimized(ROOT, cfg);
+const index = buildIndex(entries, taxo, optMap);
 
 const dir = path.join(ROOT, cfg.indexDir);
 fs.mkdirSync(dir, { recursive: true });

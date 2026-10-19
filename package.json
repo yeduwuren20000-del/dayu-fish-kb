@@ -13,7 +13,11 @@
     "pick": "node tools/pick.mjs",
     "tag": "node tools/tag.mjs",
     "fetch": "node tools/fetch.mjs",
-    "test": "node tests/kb.test.mjs"
+    "optimize": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/optimize.ps1",
+    "report": "node tools/report.mjs",
+    "job": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/job.ps1",
+    "schedule": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/schedule.ps1",
+    "test": "node tests/kb.test.mjs && node tests/optimize.test.mjs"
   },
   "license": "MIT"
 }

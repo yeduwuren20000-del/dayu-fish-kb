@@ -1,0 +1,52 @@
+# 每天 03:00（北京时间）= 19:00 UTC 跑一次：拉新 → 压图 → 建索引 → 校验 → 报告
+# 仓库里不存原图（data/ 已 gitignore），所以 CI 只提交 manifest 与报告。
+name: update-kb
+
+on:
+  schedule:
+    - cron: "0 19 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 安装 Pillow（压图用）
+        run: python -m pip install --quiet pillow
+
+      - name: 拉取上游新素材（失败不阻塞）
+        continue-on-error: true
+        run: node tools/fetch.mjs --all --limit 8
+
+      - name: 压图
+        run: python tools/optimize.py
+
+      - name: 建索引
+        run: node tools/build.mjs
+
+      - name: 校验
+        run: node tools/verify.mjs
+
+      - name: 生成报告
+        run: node tools/report.mjs
+
+      - name: 提交变更
+        run: |
+          git config user.name "dayu-fish-kb-bot"
+          git config user.email "kb@localhost"
+          git add manifest/catalog.jsonl manifest/optimized.jsonl reports/status.md
+          git diff --cached --quiet || git commit -m "chore: 定时更新 $(date -u +%Y-%m-%dT%H:%MZ)"
+          git push

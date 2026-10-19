@@ -1,7 +1,17 @@
-# 下载缓存的原始素材不入库（版权 + 体积）
+# 下载缓存与生成物不入库（避免二次分发 + 体积）
 data/raw/
 data/fixtures/
+data/opt/
+data/thumb/
+
 node_modules/
 index/
 *.log
+
+# 运行时状态，不进版本库
+reports/last-run.json
+reports/daemon.pid
+reports/daemon.log
+reports/logs/
+
 .DS_Store
