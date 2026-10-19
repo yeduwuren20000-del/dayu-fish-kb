@@ -1,0 +1,11 @@
+{
+  "dataDir": "data",
+  "catalog": "manifest/catalog.jsonl",
+  "indexDir": "index",
+  "taxonomy": "manifest/taxonomy.json",
+  "upstreams": "manifest/upstreams.json",
+  "pick": {
+    "defaultCount": 1,
+    "allowRemote": false
+  }
+}

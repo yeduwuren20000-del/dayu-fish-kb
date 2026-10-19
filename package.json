@@ -1,0 +1,19 @@
+{
+  "name": "dayu-fish-kb",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "蓝色大肥鱼（DeepSeek 娘）二次元图 / 表情包知识库：上游清单 + 受控标签 + 检索配图",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "doctor": "node tools/doctor.mjs",
+    "seed": "node tools/seed.mjs",
+    "build": "node tools/build.mjs",
+    "verify": "node tools/verify.mjs",
+    "pick": "node tools/pick.mjs",
+    "tag": "node tools/tag.mjs",
+    "fetch": "node tools/fetch.mjs",
+    "test": "node tests/kb.test.mjs"
+  },
+  "license": "MIT"
+}

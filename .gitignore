@@ -1,0 +1,7 @@
+# 下载缓存的原始素材不入库（版权 + 体积）
+data/raw/
+data/fixtures/
+node_modules/
+index/
+*.log
+.DS_Store

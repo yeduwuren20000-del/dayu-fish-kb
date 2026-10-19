@@ -1,0 +1,161 @@
+{
+  "version": 1,
+  "verifiedAt": "2026-10-19",
+  "verificationNote": "用 GitHub Trees API 实测文件清单（Node fetch 直连，2026-10-19）。observedAssets = 仓内可下载的图片/GIF 个数。",
+  "upstreams": [
+    {
+      "id": "brickaz-emotes",
+      "repo": "BrickAZ/deepseek-chan-emotes",
+      "title": "蓝色大肥鱼 · DeepSeek 娘 GIF 表情包",
+      "kind": "gif-pack",
+      "hint": "161 个 GIF，EmoteLab 导出，500px / 30fps",
+      "routes": [
+        "jsdelivr",
+        "github-api"
+      ],
+      "rawGlobs": [
+        "*.gif",
+        "**/*.gif"
+      ],
+      "license": "未标注（需向作者确认）",
+      "credit": "BrickAZ",
+      "status": "verified",
+      "observedAssets": 3,
+      "observation": "默认分支树只有 previews/ 下 3 个 GIF，161 个主体未定位"
+    },
+    {
+      "id": "lmy414-ai-girl-stickers",
+      "repo": "lmy414/ai-girl-stickers",
+      "title": "蓝色大肥鱼：AI 娘二创表情包开放档案",
+      "kind": "archive",
+      "hint": "按角色浏览、模糊搜索、原图下载、GitHub Issue 投稿",
+      "routes": [
+        "jsdelivr",
+        "github-api"
+      ],
+      "rawGlobs": [
+        "**/*.png",
+        "**/*.jpg",
+        "**/*.webp",
+        "**/*.gif"
+      ],
+      "license": "未标注（开放档案，投稿制）",
+      "credit": "lmy414 及投稿者",
+      "status": "verified",
+      "observedAssets": 3026
+    },
+    {
+      "id": "edmok-blue-fish",
+      "repo": "EDMOK/blue-fish-archive",
+      "title": "蓝色大肥鱼档案馆",
+      "kind": "archive",
+      "hint": "以「档案馆」命名的合集仓",
+      "routes": [
+        "jsdelivr",
+        "github-api"
+      ],
+      "rawGlobs": [
+        "**/*.png",
+        "**/*.jpg",
+        "**/*.gif"
+      ],
+      "license": "未标注",
+      "credit": "EDMOK",
+      "status": "verified",
+      "observedAssets": 826,
+      "observation": "混有 QRcode/og-card 等非素材，入册需挑"
+    },
+    {
+      "id": "dsh-sticker-pack",
+      "repo": "5V1A-afk/dsh-sticker-pack",
+      "title": "dsh-sticker-pack：给大肥鱼回话加表情包",
+      "kind": "tool-pack",
+      "hint": "提供 sticker_pick：挑一张图，返回可直接贴进回复的 markdown。与本仓目标最接近，优先复用其素材与调用约定。",
+      "routes": [
+        "jsdelivr",
+        "github-api"
+      ],
+      "rawGlobs": [
+        "**/*.gif",
+        "**/*.png",
+        "**/*.webp"
+      ],
+      "license": "未标注",
+      "credit": "5V1A-afk",
+      "status": "verified",
+      "observedAssets": 15
+    },
+    {
+      "id": "ds-pet",
+      "repo": "zhouwu97/ds-pet",
+      "title": "若叶睦形态大肥鱼",
+      "kind": "pet",
+      "hint": "单一形态（若叶睦）素材，接受 PR；适合 form=ruoyemu",
+      "routes": [
+        "jsdelivr",
+        "github-api"
+      ],
+      "rawGlobs": [
+        "**/*.png",
+        "**/*.gif"
+      ],
+      "license": "未标注",
+      "credit": "zhouwu97",
+      "status": "verified",
+      "observedAssets": 7
+    },
+    {
+      "id": "nail-meme-pack",
+      "repo": "the-beating-light-of-the-nail/deepseek-chan-meme-pack",
+      "title": "deepseek-chan-meme-pack",
+      "kind": "meme-pack",
+      "hint": "README.zh-CN.md 存在的 meme 合辑仓",
+      "routes": [
+        "jsdelivr",
+        "github-api"
+      ],
+      "rawGlobs": [
+        "**/*.png",
+        "**/*.jpg",
+        "**/*.gif"
+      ],
+      "license": "未标注",
+      "credit": "the-beating-light-of-the-nail",
+      "status": "verified",
+      "observedAssets": 20
+    },
+    {
+      "id": "chinesebqb-issue-167",
+      "repo": "zhaoolee/ChineseBQB",
+      "title": "ChineseBQB Issue #167：鲸鱼娘表情包合集 128 张",
+      "kind": "issue-collection",
+      "hint": "老牌表情包仓里的收录提案，可用于交叉核对去重",
+      "routes": [
+        "issue-page"
+      ],
+      "rawGlobs": [],
+      "license": "随上游仓",
+      "credit": "zhaoolee/ChineseBQB 及提案者",
+      "status": "metadata-only"
+    },
+    {
+      "id": "dsh-dayu-skin",
+      "repo": "roseion/dsh-dayu-fish-skin",
+      "title": "dsh-dayu-fish-skin（含 SOURCES.md）",
+      "kind": "skin",
+      "hint": "皮肤类项目，其 SOURCES.md 可作为交叉引用的来源账本",
+      "routes": [
+        "jsdelivr",
+        "github-api"
+      ],
+      "rawGlobs": [
+        "**/*.png",
+        "**/*.webp",
+        "**/*.gif"
+      ],
+      "license": "未标注",
+      "credit": "roseion",
+      "status": "metadata-only"
+    }
+  ]
+}

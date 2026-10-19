@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "note": "受控词表。每个维度下的 id 为唯一规范值，aliases 是中文口语/别称，检索时自动归一。新增词条请走 PR。",
+  "dimensions": {
+    "scene": {
+      "label": "使用场景",
+      "values": [
+        { "id": "zhongshu-niling", "label": "中书省·拟令", "aliases": ["拟令", "中书省", "下旨", "规划", "拆题"] },
+        { "id": "menxia-fengbo", "label": "门下封驳", "aliases": ["封驳", "门下省", "驳回", "打回", "审核不通过", "缺证据"] },
+        { "id": "shangshu-paidan", "label": "尚书派单", "aliases": ["派单", "尚书省", "分工", "排期", "调度"] },
+        { "id": "liubu-zhixing", "label": "六部执行", "aliases": ["执行", "六部", "干活", "施工", "跑命令"] },
+        { "id": "shouwei-jiean", "label": "收尾结案", "aliases": ["结案", "收尾", "交付", "完成", "done"] },
+        { "id": "baogao-cuowu", "label": "报错翻车", "aliases": ["报错", "失败", "翻车", "error", "崩了"] },
+        { "id": "dengdai", "label": "等待加载", "aliases": ["等待", "加载", "排队", "思考", "loading"] },
+        { "id": "qingzhu", "label": "庆祝通过", "aliases": ["通过", "庆祝", "搞定", "开心", "撒花"] },
+        { "id": "wenzheng", "label": "问政司·提问", "aliases": ["提问", "问政", "澄清", "确认", "选哪个"] }
+      ]
+    },
+    "mood": {
+      "label": "情绪",
+      "values": [
+        { "id": "renzhen", "label": "认真", "aliases": ["专注", "工作", "专注脸"] },
+        { "id": "yihuo", "label": "疑惑", "aliases": ["问号", "懵", "不理解"] },
+        { "id": "bailan", "label": "摆烂", "aliases": ["躺平", "躺", "放弃", "摸鱼"] },
+        { "id": "deyi", "label": "得意", "aliases": ["骄傲", "叉腰", "牛"] },
+        { "id": "xinxu", "label": "心虚", "aliases": ["尴尬", "汗", "溜了"] },
+        { "id": "zhuakuang", "label": "抓狂", "aliases": ["急", "崩溃", "火大"] },
+        { "id": "guaiqiao", "label": "乖巧", "aliases": ["听话", "点头", "收到"] },
+        { "id": "shui", "label": "困/睡", "aliases": ["困", "睡觉", "熬夜"] },
+        { "id": "weiqu", "label": "委屈", "aliases": ["哭", "求放过", "可怜"] },
+        { "id": "zhenjing", "label": "震惊", "aliases": ["惊", "瞪眼", "什么"] }
+      ]
+    },
+    "form": {
+      "label": "形态",
+      "values": [
+        { "id": "default", "label": "默认蓝发", "aliases": ["本体", "常服", "原版"] },
+        { "id": "qban", "label": "Q版", "aliases": ["chibi", "小小只", "loli"] },
+        { "id": "nvpu", "label": "女仆装", "aliases": ["maid", "执事"] },
+        { "id": "ruoyemu", "label": "若叶睦形态", "aliases": ["睦", "mutsumi"] },
+        { "id": "jingyu", "label": "鲸鱼本体", "aliases": ["鱼", "蓝鱼", "非人"] },
+        { "id": "dongtai", "label": "动图", "aliases": ["gif", "动态"] }
+      ]
+    },
+    "usage": {
+      "label": "用途位",
+      "values": [
+        { "id": "avatar", "label": "头像/缩略", "aliases": ["头像", "icon", "小图"] },
+        { "id": "banner", "label": "横幅/封面", "aliases": ["横幅", "banner", "头图", "封面"] },
+        { "id": "inline", "label": "正文插图", "aliases": ["配图", "插图", "inline", "图注"] },
+        { "id": "reaction", "label": "表情回应", "aliases": ["表情", "reaction", "回复配图"] }
+      ]
+    }
+  }
+}
