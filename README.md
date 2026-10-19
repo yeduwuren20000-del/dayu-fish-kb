@@ -183,7 +183,7 @@ $ npm run pick -- --scene 结案 --n 2
 ![大肥鱼 · 结案：证据齐了，交付清单](data/fixtures/fx-07-jiean.png "shouwei-jiean / deyi / default")
 ```
 
-顺带抓到一个真实坑：`blue-fish-originals/026e44f4….png` 内容其实是 JPEG。`tag` 按魔数把它改名成 `.jpg`，`verify` 也会对这类「扩展名骗人」发警告——因为 jsDelivr 会按扩展名发 `Content-Type`，改名前贴进渲染器会解码失败。
+还有一道守门值得知道：`tag` 入库时会按**魔数**核对真实格式，与扩展名不符就自动改名并留档；`verify` 也会对这类「扩展名骗人」发警告。原因是 jsDelivr 按扩展名发 `Content-Type`，不改名贴进渲染器会解码失败。本次 10 个样本魔数与扩展名全部一致（`.png` 确为 PNG、`.jpg` 确为 JPEG），没触发这条——但守卫先备好了，因为上游仓是众包的，混格式是迟早的事。
 
 ---
 
