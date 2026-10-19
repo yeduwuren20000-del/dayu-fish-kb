@@ -10,6 +10,11 @@ on:
 permissions:
   contents: write
 
+env:
+  # CI 只带 manifest，不带原图（data/ 在 .gitignore 里）：
+  # 源文件/优化版缺失按警告处理，侧车里已有的本地记录原样保留
+  DAYU_ALLOW_MISSING: "1"
+
 jobs:
   update:
     runs-on: ubuntu-latest

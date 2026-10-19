@@ -228,6 +228,8 @@ npm run schedule -- -Action remove
 
 **3) GitHub Actions cron**（`.github/workflows/update.yml`，每天 UTC 19:00 = 北京 03:00）：把这仓推到远端，让 CI 定期拉新并回写 manifest；同样只提交 manifest 和报告。
 
+CI 里**没有原图**（`data/` 在 `.gitignore` 里），所以 workflow 设了 `DAYU_ALLOW_MISSING=1`：源文件/优化版缺失只算警告，且 `optimized.jsonl` 里已有的本地记录会原样保留——CI 跑一遍不会把你本机那 20 条侧车记录冲掉。手动复现：`DAYU_ALLOW_MISSING=1 npm run verify`。
+
 `scripts/job.ps1` 的行为是可预期的失败，不是「静默成功」：
 
 - `fetch` 失败**只告警不中断**（断网/代理挂了不该让后面白跑）；

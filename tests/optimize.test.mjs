@@ -85,3 +85,16 @@ test("validateOptimized 对缺失文件报错，对「优化后更大」只告�
   assert.equal(r.warnings.length, 1);
   assert.match(r.warnings[0], /反而变大/);
 });
+
+test("allow-missing：CI 上缺文件只算警告，不算错", () => {
+  const root = tmpRoot();
+  const rec = makeOpt(root, "a/b", Buffer.from("x"));
+  fs.rmSync(path.join(root, rec.opt));
+  const map = new Map([["a/b", rec]]);
+  const strict = validateOptimized(map, root);
+  const relaxed = validateOptimized(map, root, { allowMissing: true });
+  assert.equal(strict.errors.length, 1);
+  assert.equal(relaxed.errors.length, 0);
+  assert.equal(relaxed.warnings.length, 1);
+  assert.match(relaxed.warnings[0], /文件缺失/);
+});

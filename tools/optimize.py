@@ -176,6 +176,11 @@ def main():
     ap.add_argument("--only", default=None, help="只处理 id 含该子串的条目")
     ap.add_argument("--max-edge", type=int, default=1920, help="全局长边上限（兜底）")
     ap.add_argument("--no-draft", action="store_true", help="只压已打标的 catalog，不碰草稿")
+    ap.add_argument(
+        "--allow-missing",
+        action="store_true",
+        help="源文件缺失只告警不报错（CI 上原图不入库；也可用 DAYU_ALLOW_MISSING=1）",
+    )
     args = ap.parse_args()
 
     cfg = load_cfg()
@@ -203,12 +208,20 @@ def main():
         return 1
 
     prev = {r["id"]: r for r in read_jsonl(opt_path) if r.get("id")}
-    records, skipped, failed = [], 0, []
+    records, skipped, failed, missing = [], 0, [], []
+    allow_missing = args.allow_missing or os.environ.get("DAYU_ALLOW_MISSING") == "1"
 
     for e in entries:
         src = ROOT / e["file"]
         if not src.exists():
-            failed.append((e["id"], "源文件不存在"))
+            if allow_missing:
+                missing.append(e["id"])
+                # 保留上一次的侧车记录：CI 上文件不在，但本地那份记录仍然有效，
+                # 不能因为 CI 跑一遍就把 12 条本地记录从 optimized.jsonl 里抹掉
+                if e["id"] in prev:
+                    records.append(prev[e["id"]])
+            else:
+                failed.append((e["id"], "源文件不存在"))
             continue
         src_sha = sha256_file(src)
         slug = slug_of(e["id"])
@@ -268,6 +281,8 @@ def main():
     )
     for i, why in failed:
         print(f"  ✗ {i}: {why}")
+    if missing:
+        print(f"  ⚠ 源文件缺失 {len(missing)} 条（allow-missing，跳过）：{', '.join(missing[:3])}{' …' if len(missing) > 3 else ''}")
     return 0 if not failed else 2
 
 
