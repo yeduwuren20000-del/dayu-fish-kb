@@ -1,5 +1,9 @@
 # dayu-fish-kb · 蓝色大肥鱼配图知识库
 
+[![update-kb](https://github.com/yeduwuren20000-del/dayu-fish-kb/actions/workflows/update.yml/badge.svg)](https://github.com/yeduwuren20000-del/dayu-fish-kb/actions/workflows/update.yml)
+
+仓库：<https://github.com/yeduwuren20000-del/dayu-fish-kb>（每天 03:00 由 Actions 自动拉新）
+
 把「蓝色大肥鱼」（DeepSeek 娘 / 鲸鱼娘）散落在各个仓库里的**二次元插画与表情包**，收成一份**可检索、可追溯、可直接贴进回复**的知识库。目标不是再做一个图包，而是让「该配哪张图」变成一次查询。
 
 > 结论先说：GitHub 上**已经有**专门收集大肥鱼的仓库，但都停在「一堆文件 + 一个预览页」。缺的是标签、去重、来源账本和检索接口——这个仓补的就是这一层。上游清单见 [上游仓库](#上游仓库现状)。
@@ -229,6 +233,8 @@ npm run schedule -- -Action remove
 **3) GitHub Actions cron**（`.github/workflows/update.yml`，每天 UTC 19:00 = 北京 03:00）：把这仓推到远端，让 CI 定期拉新并回写 manifest；同样只提交 manifest 和报告。
 
 CI 里**没有原图**（`data/` 在 `.gitignore` 里），所以 workflow 设了 `DAYU_ALLOW_MISSING=1`：源文件/优化版缺失只算警告，且 `optimized.jsonl` 里已有的本地记录会原样保留——CI 跑一遍不会把你本机那 20 条侧车记录冲掉。手动复现：`DAYU_ALLOW_MISSING=1 npm run verify`。
+
+仓已推到 [yeduwuren20000-del/dayu-fish-kb](https://github.com/yeduwuren20000-del/dayu-fish-kb)，Actions 里 `update-kb` 状态 `active`。想立刻跑一次：在 Actions 页面点 **Run workflow**（对应 API `workflow_dispatch` 需要 token 带 `Actions: write`，本机这把细粒度 token 没这个权限，会返回 403——用网页点即可）。
 
 `scripts/job.ps1` 的行为是可预期的失败，不是「静默成功」：
 
