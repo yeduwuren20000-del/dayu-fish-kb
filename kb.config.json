@@ -6,6 +6,7 @@
   "thumbDir": "data/thumb",
   "indexDir": "index",
   "taxonomy": "manifest/taxonomy.json",
+  "nodeMap": "manifest/node-map.json",
   "upstreams": "manifest/upstreams.json",
   "pick": {
     "defaultCount": 1,

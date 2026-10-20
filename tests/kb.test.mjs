@@ -15,6 +15,12 @@ import {
   buildIndex,
   pick,
   render,
+  hamming,
+  nearDuplicateGroups,
+  applyOptimized,
+  loadNodeMap,
+  resolveNode,
+  validateNodeMap,
 } from "../lib/kb.mjs";
 
 const REPO = path.resolve(import.meta.dirname, "..");
@@ -130,4 +136,62 @@ test("索引倒排可用：场景桶指向正确条目", () => {
   assert.deepEqual(idx.byTag["scene:menxia-fengbo"], ["fx-02-fengbo"]);
   assert.equal(idx.untagged.length, 0);
   assert.equal(idx.local, SPECS.length);
+});
+
+test("节点表：--node 展开成一组条件，写错词表会被 verify 拦下", () => {
+  const { root, cfg, taxo } = makeKb();
+  fs.writeFileSync(
+    path.join(root, "manifest", "node-map.json"),
+    JSON.stringify({
+      nodes: {
+        封驳: { node: "门下封驳", scene: "封驳", usage: ["表情"], form: ["Q版"], note: "小图" },
+        瞎写: { node: "不存在节点", scene: "这个场景没有", usage: ["没这个用法"] },
+      },
+    })
+  );
+  const map = loadNodeMap(root, cfg);
+  const node = resolveNode(taxo, map, "封驳");
+  assert.equal(node.node, "门下封驳");
+  assert.deepEqual(node.scene, ["menxia-fengbo"], "别名应归一成 id");
+  assert.deepEqual(node.usage, ["reaction"]);
+  assert.equal(resolveNode(taxo, map, "查无此节点"), null);
+  // loadNodeMap 只认外壳里的 nodes，不把 version/note 当节点
+  assert.ok(!("version" in map) && !("note" in map));
+  const errs = validateNodeMap(taxo, map);
+  assert.equal(errs.length, 2, errs.join("\n"));
+  assert.ok(errs.some((e) => e.includes("scene:这个场景没有")));
+});
+
+test("hamming：只数不同的 bit，坏输入返回 null", () => {
+  assert.equal(hamming("0000000000000000", "0000000000000000"), 0);
+  assert.equal(hamming("0000000000000000", "0000000000000003"), 2);
+  assert.equal(hamming("ffffffffffffffff", "0000000000000000"), 64);
+  assert.equal(hamming(null, "0000000000000000"), null);
+  assert.equal(hamming("zz", "0000000000000000"), null);
+});
+
+test("近似去重：dHash 距离 ≤6 算同一组；内容不同但 sha 相同的另算", () => {
+  const { root, cfg, taxo } = makeKb();
+  const entries = loadCatalog(root, cfg);
+  // fx-02 与 fx-09 字节不同（sha 不同）但指纹只差 3bit → 近似重复
+  // fx-03 与 fx-05 字节相同（sha 相同）→ 走原有的完全重复分支
+  const optMap = new Map([
+    ["fx-02-fengbo", { dhash: "0000000000000000", opt: "data/opt/a.webp" }],
+    ["fx-09-qingzhu", { dhash: "0000000000000007", opt: "data/opt/b.webp" }],
+    ["fx-03-paidan", { dhash: "ffffffffffffffff", opt: "data/opt/c.webp" }],
+  ]);
+  const groups = nearDuplicateGroups(entries, optMap);
+  assert.equal(groups.length, 1, JSON.stringify(groups));
+  assert.deepEqual(groups[0].slice().sort(), ["fx-02-fengbo", "fx-09-qingzhu"]);
+  const idx = buildIndex(entries, taxo, optMap);
+  assert.deepEqual(idx.nearDuplicates, groups);
+
+  const eOpt = applyOptimized(entries, optMap);
+  const { picks, droppedDuplicates } = pick(eOpt, taxo, {}, { n: 20 });
+  assert.ok(droppedDuplicates.includes("fx-09-qingzhu"), "近似重复应被压掉");
+  assert.ok(!picks.some((p) => p.id === "fx-09-qingzhu"));
+  assert.ok(picks.some((p) => p.id === "fx-02-fengbo"), "同组里要留下先命中的那张");
+  const { picks: keep } = pick(eOpt, taxo, {}, { n: 20, keepNearDups: true });
+  assert.ok(keep.some((p) => p.id === "fx-09-qingzhu"), "keepNearDups 应放行近似重复");
+  assert.ok(!keep.some((p) => p.id === "fx-05-dup-of-paidan"), "字节级重复任何情况下都不放行");
 });

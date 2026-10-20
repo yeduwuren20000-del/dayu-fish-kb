@@ -1,7 +1,7 @@
 // 校验：文件真实存在、sha 对得上、标签都在词表内、id 不重复、优化版与侧车一致
 // --allow-missing（或 DAYU_ALLOW_MISSING=1）：CI 上原图/优化版不入库，缺失只算警告
 import { ROOT, parseArgs } from "../lib/cli.mjs";
-import { loadConfig, loadTaxonomy, loadCatalog, loadOptimized, validateCatalog, validateOptimized } from "../lib/kb.mjs";
+import { loadConfig, loadTaxonomy, loadCatalog, loadOptimized, loadNodeMap, validateNodeMap, validateCatalog, validateOptimized } from "../lib/kb.mjs";
 
 const args = parseArgs(process.argv.slice(2));
 const allowMissing = Boolean(args["allow-missing"]) || process.env.DAYU_ALLOW_MISSING === "1";
@@ -14,7 +14,10 @@ const catalog = validateCatalog(entries, taxo, ROOT, { allowMissing });
 const optMap = loadOptimized(ROOT, cfg);
 const opt = validateOptimized(optMap, ROOT, { allowMissing });
 
-const errors = [...catalog.errors, ...opt.errors];
+// 节点表写了词表外的值，会让 --node 查得到节点却一张图也不出，这里拦下
+const nodeErrors = validateNodeMap(taxo, loadNodeMap(ROOT, cfg));
+
+const errors = [...catalog.errors, ...opt.errors, ...nodeErrors];
 const warnings = [...catalog.warnings, ...opt.warnings];
 
 for (const w of warnings) console.log(`⚠ ${w}`);

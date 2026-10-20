@@ -129,6 +129,30 @@ def flatten(im):
     return im
 
 
+def dhash(im, size=8):
+    """dHash：灰度缩到 9x8，逐行比相邻像素，得 64bit（16 个 hex 字符）。
+
+    为什么在 Python 算：Node 侧零依赖解不了 WebP/PNG，但压图本来就要解码，
+    顺手把指纹带进侧车 optimized.jsonl，Node 只做汉明距离比较。
+    动图取首帧（与缩略图口径一致）。
+    ⚠ 透明素材必须先合成到白底：PIL 的 convert("L") 对 RGBA 是直接丢 alpha，
+    透明区残留的 RGB 值会让指纹完全不可比（实测同一张图两种留底能差到 15+ bit）。
+    """
+    if im.mode in ("RGBA", "LA", "PA"):
+        im = im.convert("RGBA")
+        base = Image.new("RGBA", im.size, (255, 255, 255, 255))
+        base.alpha_composite(im)
+        im = base.convert("RGB")
+    g = im.convert("L").resize((size + 1, size), Image.Resampling.BILINEAR)
+    px = list(g.getdata())
+    bits = 0
+    for row in range(size):
+        base_idx = row * (size + 1)
+        for col in range(size):
+            bits = (bits << 1) | (1 if px[base_idx + col] > px[base_idx + col + 1] else 0)
+    return format(bits, "016x")
+
+
 def optimize_one(src, entry, cap):
     edge, quality = policy_for(entry, cap)
     with Image.open(src) as im:
@@ -150,6 +174,7 @@ def optimize_one(src, entry, cap):
                 "width": w,
                 "height": h,
                 "quality": quality,
+                "dhash": dhash(first),
                 "save": lambda out: first.save(
                     out, "WEBP", save_all=True, append_images=kept[1:], duration=durations,
                     loop=0, quality=quality, method=6,
@@ -165,6 +190,7 @@ def optimize_one(src, entry, cap):
             "width": w,
             "height": h,
             "quality": quality,
+            "dhash": dhash(still),
             "save": lambda out: still.save(out, "WEBP", quality=quality, method=6),
             "thumb_save": lambda out: fit(still, THUMB_EDGE).save(out, "WEBP", quality=THUMB_Q, method=6),
         }
@@ -228,7 +254,15 @@ def main():
         out = opt_dir / f"{slug}.webp"
         thumb = thumb_dir / f"{slug}.webp"
         old = prev.get(e["id"])
-        if not args.force and old and old.get("srcSha256") == src_sha and out.exists() and thumb.exists():
+        # 老记录没有 dhash 也要重压一次，否则近似去重漏掉它
+        if (
+            not args.force
+            and old
+            and old.get("srcSha256") == src_sha
+            and old.get("dhash")
+            and out.exists()
+            and thumb.exists()
+        ):
             records.append(old)
             skipped += 1
             continue
@@ -254,6 +288,7 @@ def main():
             "frames": job["frames"],
             "animated": job["animated"],
             "quality": job["quality"],
+            "dhash": job["dhash"],
             "draft": bool(e.get("draft")),
         }
         records.append(rec)

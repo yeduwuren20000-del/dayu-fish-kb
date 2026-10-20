@@ -4,8 +4,9 @@
 //   node tools/pick.mjs --scene 门下封驳 --mood 疑惑 --format html
 //   node tools/pick.mjs --usage banner --format list
 //   node tools/pick.mjs --for 门下封驳            # 场景别名，同 --scene
+//   node tools/pick.mjs --node 封驳              # 读 manifest/node-map.json，一次给全套条件
 import { ROOT, parseArgs, multi } from "../lib/cli.mjs";
-import { loadConfig, loadTaxonomy, loadCatalog, loadOptimized, applyOptimized, pick, render } from "../lib/kb.mjs";
+import { loadConfig, loadTaxonomy, loadCatalog, loadOptimized, applyOptimized, loadNodeMap, resolveNode, pick, render } from "../lib/kb.mjs";
 
 const args = parseArgs(process.argv.slice(2));
 const cfg = loadConfig(ROOT);
@@ -13,12 +14,27 @@ const taxo = loadTaxonomy(ROOT, cfg);
 // 默认用压缩后的 WebP（体积小一个数量级）；要看原图加 --raw
 const entries = applyOptimized(loadCatalog(ROOT, cfg), loadOptimized(ROOT, cfg), { raw: Boolean(args.raw) });
 
-const scene = multi(args.scene ?? args.for);
+// --node 把节点表里的一组默认条件展开；显式写的 --scene/--mood/... 覆盖表里的默认值
+let node = null;
+if (args.node) {
+  node = resolveNode(taxo, loadNodeMap(ROOT, cfg), args.node);
+  if (!node) {
+    const table = loadNodeMap(ROOT, cfg);
+    console.error(`✗ 节点表里没有「${args.node}」。可选：${Object.keys(table).join("、")}（表在 manifest/node-map.json，加一行就行）`);
+    process.exit(1);
+  }
+  console.error(node.note ? `ℹ 节点「${args.node}」→ ${node.node}：${node.note}` : `ℹ 节点「${args.node}」→ ${node.node}`);
+}
+const cond = (explicit, dim) => {
+  const list = multi(explicit);
+  return list.length ? list : node && node[dim] ? node[dim] : [];
+};
+
 const query = {
-  scene,
-  mood: multi(args.mood),
-  form: multi(args.form),
-  usage: multi(args.usage),
+  scene: cond(args.scene ?? args.for, "scene"),
+  mood: cond(args.mood, "mood"),
+  form: cond(args.form, "form"),
+  usage: cond(args.usage, "usage"),
   keyword: typeof args.keyword === "string" ? args.keyword : typeof args.q === "string" ? args.q : "",
 };
 
@@ -26,6 +42,7 @@ const { picks, fallback, droppedDuplicates, unknownTags, query: normalized } = p
   n: Number(args.n) || cfg.pick.defaultCount,
   strict: Boolean(args.strict),
   allowRemote: Boolean(args["allow-remote"]) || cfg.pick.allowRemote,
+  keepNearDups: Boolean(args["keep-near-dups"]),
 });
 
 if (unknownTags.length) console.error(`⚠ 词表未收录，已忽略：${unknownTags.join(", ")}`);

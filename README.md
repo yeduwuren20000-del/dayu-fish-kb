@@ -17,7 +17,7 @@
 | 痛点 | 本仓的做法 |
 | --- | --- |
 | 图多但不知道哪张对 | 四维受控词表（场景 / 情绪 / 形态 / 用途位），口语别名自动归一（`封驳`→`menxia-fengbo`） |
-| 同一个梗存了八遍 | sha256 去重，重复项保留最匹配的一张并如实报告被压掉的 id |
+| 同一个梗存了八遍 | 两道去重：整文件 sha256（字节相同）+ dHash 近似重复（同图不同尺寸/压缩/背景），检索时自动只留一张并报告被压掉的 id |
 | 素材来源说不清、不敢用 | 每条记录带 `credit` / `license` / 上游 `url`，`manifest/upstreams.json` 就是来源账本 |
 | 换个人接手就废 | 纯 JSONL + 无依赖 Node 脚本，`verify` 会抓出文件丢失、哈希不符、词表外标签 |
 
@@ -72,6 +72,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts\daemon.ps1
 | `--strict` | 给了场景就硬过滤，宁可少给也不混入别的部门 |
 | `--allow-remote` | 允许返回只有 URL、没有本地文件的条目 |
 | `--raw` | 返回原图路径（默认给压过的 WebP） |
+| `--node` | 按三省六部节点一次给全套条件（读 `manifest/node-map.json`）：`--node 封驳` = 场景封驳 + 表情 + Q版 |
+| `--keep-near-dups` | 不压近似重复（想看同一张图的两个版本时用）；默认按 dHash 只留一张 |
 | `--format` | `md`（默认）/ `html` / `json` / `list` |
 
 打分权重 `scene 6 > mood 4 > usage 3 > form 2`，关键词 +2；同分按 id 升序，保证可复现。全部不命中时**退回全量并在 stderr 标 `fallback`**，让 UI 有兜底图，但不假装匹配成功。
@@ -94,6 +96,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts\daemon.ps1
 
 词表全量在 [`manifest/taxonomy.json`](manifest/taxonomy.json)。改词表不需要改代码；`verify` 会拦下词表外的标签。
 
+上表已经固化成 [`manifest/node-map.json`](manifest/node-map.json)：`pick --node 封驳` 一次展开「场景 + 用途位 + 形态」，不用再记三个参数。加节点就是加一行 JSON；表里写了词表外的值，`verify` 直接报错——因为那种节点会「查得到但一张图也不出」。
+
 ---
 
 ## 仓库结构
@@ -102,6 +106,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts\daemon.ps1
 kb.config.json            路径与默认参数
 manifest/
   taxonomy.json           四维受控词表（唯一真源）
+  node-map.json           三省六部节点 → 默认配图条件（pick --node 用）
   upstreams.json          上游来源账本（含核实状态）
   catalog.jsonl           已入库条目，一行一条
   catalog.draft.jsonl     fetch 下来的待打标草稿（gitignore 可选）
@@ -121,8 +126,8 @@ scripts/
   daemon.ps1              用户态守护进程（-At 03:30 / -EverySeconds / -Once）
   optimize.ps1            找对 python 再调 optimize.py 的包装器
 .github/workflows/update.yml  CI 侧 cron 定时任务
-tests/kb.test.mjs         11 条自测（检索/校验）
-tests/optimize.test.mjs   6 条自测（优化版 overlay 与篡改守门）
+tests/kb.test.mjs         14 条自测（检索/校验/近似去重/节点表）
+tests/optimize.test.mjs   7 条自测（优化版 overlay 与篡改守门）
 data/opt/                 压过的 WebP（gitignore）
 data/thumb/               320px 缩略图（gitignore）
 reports/                  status.md / last-run.json / daemon.pid / daemon.log / logs/
@@ -306,8 +311,9 @@ $ npm run pick -- --scene 结案 --n 2
 - 上游有 LFS / 大文件：实测遇到 1 个 403（LFS 指针）和 1 个 > 8MB 的 GIF，前者需要 `git lfs`（当前不可用），后者被 `MAX_BYTES` 主动跳过。
 - `BrickAZ/deepseek-chan-emotes` 声明的 161 个 GIF 在默认分支树上只有 3 个，主体未定位。
 - 压缩包内素材（`*.zip` / `*.7z`）不解包，需人工解到 `data/raw/<upstream>/` 后 `tag --new`。
-- 未做图片内容理解（自动打标），标签靠人工或模型逐条过；已入库的 2 张真图是看图后手打的标签。
-- 未做 GIF 帧级去重 / 近似去重，只按整文件 sha256。
+- 未做图片内容理解（自动打标），标签靠人工或模型逐条过；已入库的 25 条都是看图后手打的标签。
+- 近似去重按 **dHash 首帧**（8×8=64bit，汉明距离 ≤6 视为同图）；GIF 逐帧去重、以及「同一姿势不同表情」这种语义级重复仍未做。阈值是在本地 25 条上定的：同图两版实测距离 0，而内容不同的表情之间最小距离 9，所以取 6 留了余量——素材多了要重估。
+- dHash 由 `optimize.py` 算并写进侧车，**只在有优化版时生效**；`--raw` 或没跑过压图的条目仍只有 sha256 这一道。透明素材的指纹必须先合成到白底（PIL 的 `convert("L")` 会直接丢 alpha，残留 RGB 能让同一张图差到 15bit 以上，指纹完全不可比）。
 - **压图依赖 Pillow**：用的是随 DSH 分发的 Python（`D:\...\dsh-runtimes\dsh-primary-runtime\dependencies\python\python.exe`，Pillow 12.3.0）。系统里的 `python` 可能没装 Pillow——`scripts\optimize.ps1` 会按 `DAYU_PYTHON` 环境变量 → 随包路径 → PATH 上 `python` 的顺序找，找不到就报错退出，不会假装成功。缩略图对动图只取首帧。
 - **`scripts\*.ps1` 必须存成带 UTF-8 BOM**：Windows PowerShell 5.1 读无 BOM 的 UTF-8 会按 GBK 解码，中文字符串被拆坏后报 `Unexpected token '...'`。已全部带 BOM；以后再编辑这些脚本，记得保留 BOM。
 - **沙箱内装不了 Windows 计划任务**：`schtasks` 连 RPC 都开不了（`ERROR: The system cannot find the path specified.`），`Register-ScheduledTask` 报「拒绝访问」。所以 `npm run schedule` 在沙箱里会走「打印命令 + 提示用 daemon」的分支；真要装，请到普通 PowerShell 窗口跑。
@@ -315,10 +321,12 @@ $ npm run pick -- --scene 结案 --n 2
 ## 下一步
 
 - [ ] 网络恢复后逐仓 `fetch --dry-run` 核对路径，把 `upstreams.json` 的 `metadata-only` 改成 `verified`
-- [ ] 加 `phash` 近似去重（同图不同压缩/尺寸）
-- [ ] `pick --for 报错` 这类「节点 → 场景」映射固化成配置，省掉每次查表
+- [x] 近似去重：dHash 64bit（比 pHash 更省——纯 Python 十几行，不用 DCT/FFT），指纹进侧车，`build` 报组、`pick` 自动压
+- [x] `pick --node 报错` 这类「节点 → 场景」映射固化成 `manifest/node-map.json`，并在 `verify` 里校验表内词表
+- [x] CI 加 `push` 触发（只监听代码/配置路径，避开自触发），改了流水线能立刻知道在 CI 上跑不跑得过
 - [ ] 导出 `index.json` 的静态检索页（纯前端，无后端）
 - [ ] 与 DSH 侧 `sticker_pick` 对齐参数，避免两套调用约定
+- [ ] 自动打标：让模型读缩略图批量出候选标签，人工只做确认（现在 25 条全是手打的）
 
 ## License
 

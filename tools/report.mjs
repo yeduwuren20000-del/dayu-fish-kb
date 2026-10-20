@@ -58,6 +58,7 @@ const md = `# 大肥鱼配图知识库 · 体检报告
 - 标签桶 ${Object.keys(index.byTag).length}，词表外标签 ${index.unknownTags.length}
 - 优化版 ${optMap.size} 条：${mb(tin)} → ${mb(tout)}，**省 ${saved}%**
 - sha256 重复 ${index.duplicates.length} 组${index.duplicates.length ? `：${index.duplicates.map((g) => g.join(" = ")).join("; ")}` : ""}
+- 近似重复（dHash）${(index.nearDuplicates || []).length} 组${(index.nearDuplicates || []).length ? `：${index.nearDuplicates.map((g) => g.join(" ≈ ")).join("; ")}` : ""}
 - 草稿里还没打标的：${untaggedDraft}
 
 ## 最重的 5 张（优化后）

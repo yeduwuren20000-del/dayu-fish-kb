@@ -21,6 +21,13 @@ console.log(`  标签桶 ${tagCount}，未打标 ${index.untagged.length}，词�
 if (index.duplicates.length) {
   console.log(`  ⚠ sha256 重复 ${index.duplicates.length} 组：${index.duplicates.map((g) => g.join(" = ")).join("; ")}`);
 }
+if (index.nearDuplicates.length) {
+  // 内容近似但 sha 不同（上游把同一张图存成两个文件/两种尺寸）：pick 会自动只出一张
+  console.log(
+    `  ℹ 近似重复 ${index.nearDuplicates.length} 组（dHash，检索时自动去重）：` +
+      index.nearDuplicates.map((g) => g.map((x) => x.split("/").pop()).join(" ≈ ")).join("; ")
+  );
+}
 if (index.untagged.length) {
   console.log(`  ⚠ 未打标条目：${index.untagged.join(", ")}`);
 }

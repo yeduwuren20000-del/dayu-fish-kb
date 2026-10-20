@@ -80,7 +80,7 @@ if (-not $okVerify) { $script:verifyFailed = $true }
 
 if ($Commit -and -not $script:failed) {
   [void](Invoke-Step -Name 'commit' -Tolerate -Body {
-    & git add manifest/catalog.jsonl manifest/optimized.jsonl reports/status.md 2>&1 | Out-Null
+    & git add manifest/catalog.jsonl manifest/catalog.draft.jsonl manifest/optimized.jsonl reports/status.md 2>&1 | Out-Null
     $dirty = & git status --porcelain
     if (-not $dirty) { Write-Host '没有变更，跳过 commit'; return }
     & git -c user.name='dayu-fish-kb-bot' -c user.email='kb@localhost' commit -q -m "chore: 定时更新 $stamp"

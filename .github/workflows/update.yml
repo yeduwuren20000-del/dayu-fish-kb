@@ -6,6 +6,21 @@ on:
   schedule:
     - cron: "0 19 * * *"
   workflow_dispatch:
+  # 代码/词表/节点表改动后立刻自验一次。刻意不监听 CI 自己写的
+  # manifest/{catalog,optimized} 与 reports/ —— 否则定时任务提交会把自己再触发一遍。
+  push:
+    branches: [main]
+    paths:
+      - "lib/**"
+      - "tools/**"
+      - "tests/**"
+      - "scripts/**"
+      - "manifest/taxonomy.json"
+      - "manifest/node-map.json"
+      - "manifest/upstreams.json"
+      - "kb.config.json"
+      - "package.json"
+      - ".github/workflows/update.yml"
 
 permissions:
   contents: write
@@ -38,6 +53,11 @@ jobs:
 
       - name: 压图
         run: python tools/optimize.py
+
+      - name: 自测
+        run: |
+          node tests/kb.test.mjs
+          node tests/optimize.test.mjs
 
       - name: 建索引
         run: node tools/build.mjs
