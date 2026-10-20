@@ -95,5 +95,25 @@ if (srcFile) {
 
 const catalogPath = path.join(ROOT, cfg.catalog);
 fs.writeFileSync(catalogPath, entries.map((e) => JSON.stringify(e)).join("\n") + "\n");
+
+// 认领成功后把该行从草稿里删掉：否则草稿永远堆积，CI 也数不清还剩几张待打标
+if (args.new) {
+  const draftPath = path.join(ROOT, "manifest", "catalog.draft.jsonl");
+  if (fs.existsSync(draftPath)) {
+    const kept = fs
+      .readFileSync(draftPath, "utf8")
+      .split(/\r?\n/)
+      .filter(Boolean)
+      .filter((l) => {
+        try {
+          return JSON.parse(l).id !== id;
+        } catch {
+          return true;
+        }
+      });
+    fs.writeFileSync(draftPath, kept.length ? kept.join("\n") + "\n" : "");
+    console.log(`ℹ 已从草稿移除 ${id}（剩余待打标 ${kept.length}）`);
+  }
+}
 console.log(`✓ ${id} 已更新`);
 console.log(JSON.stringify(entry, null, 2));

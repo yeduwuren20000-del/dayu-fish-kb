@@ -10,11 +10,18 @@ function tmpRoot() {
   return fs.mkdtempSync(path.join(os.tmpdir(), "dayu-opt-"));
 }
 
-function makeOpt(root, id, bytes, { srcBytes = 1_000_000, animated = false } = {}) {
+function makeOpt(root, id, bytes, { srcBytes = 1_000_000, animated = false, withSrc = true } = {}) {
   const rel = `data/opt/${id.replace(/\//g, "__")}.webp`;
   const abs = path.join(root, rel);
   fs.mkdirSync(path.dirname(abs), { recursive: true });
   fs.writeFileSync(abs, bytes);
+  if (withSrc) {
+    // 校验器区分「本机有原图却缺优化版（错）」和「两边都不在本机（只是别处生成的记录，警告）」，
+    // 所以默认造一个占位原图，需要测前者时把 withSrc 显式关掉。
+    const srcAbs = path.join(root, "data/raw/x.png");
+    fs.mkdirSync(path.dirname(srcAbs), { recursive: true });
+    fs.writeFileSync(srcAbs, Buffer.from("raw"));
+  }
   const thumbRel = `data/thumb/${id.replace(/\//g, "__")}.webp`;
   fs.mkdirSync(path.dirname(path.join(root, thumbRel)), { recursive: true });
   fs.writeFileSync(path.join(root, thumbRel), bytes);
@@ -81,7 +88,7 @@ test("validateOptimized 对缺失文件报错，对「优化后更大」只告�
   const bigger = makeOpt(root, "c/d", Buffer.from("0123456789"), { srcBytes: 5 });
   const r = validateOptimized(new Map([["a/b", missing], ["c/d", bigger]]), root);
   assert.equal(r.errors.length, 1);
-  assert.match(r.errors[0], /不存在/);
+  assert.match(r.errors[0], /有原图但缺优化版/);
   assert.equal(r.warnings.length, 1);
   assert.match(r.warnings[0], /反而变大/);
 });

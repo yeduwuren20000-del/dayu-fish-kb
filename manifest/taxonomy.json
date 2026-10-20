@@ -20,7 +20,7 @@
       "label": "情绪",
       "values": [
         { "id": "renzhen", "label": "认真", "aliases": ["专注", "工作", "专注脸"] },
-        { "id": "yihuo", "label": "疑惑", "aliases": ["问号", "懵", "不理解"] },
+        { "id": "yihuo", "label": "疑惑", "aliases": ["问号", "懵", "不理解", "好奇"] },
         { "id": "bailan", "label": "摆烂", "aliases": ["躺平", "躺", "放弃", "摸鱼"] },
         { "id": "deyi", "label": "得意", "aliases": ["骄傲", "叉腰", "牛"] },
         { "id": "xinxu", "label": "心虚", "aliases": ["尴尬", "汗", "溜了"] },

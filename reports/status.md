@@ -1,15 +1,15 @@
 # 大肥鱼配图知识库 · 体检报告
 
-> 生成时间：2026-10-19T22:51:36.195Z　｜　自动生成，请勿手改（改 `tools/report.mjs`）
+> 生成时间：2026-10-20T20:57:42.963Z　｜　自动生成，请勿手改（改 `tools/report.mjs`）
 
 ## 总量
 
-- 条目 **12**（local 12 / remote 0）
-- 已打标 12，未打标 0
-- 标签桶 23，词表外标签 0
+- 条目 **25**（local 25 / remote 0）
+- 已打标 25，未打标 0
+- 标签桶 26，词表外标签 0
 - 优化版 25 条：40.91 MB → 4.68 MB，**省 89%**
 - sha256 重复 1 组：fx-03-paidan = fx-05-dup-of-paidan
-- 草稿里还没打标的：15
+- 草稿里还没打标的：0
 
 ## 最重的 5 张（优化后）
 
@@ -26,13 +26,13 @@
 | 场景 | id | 张数 |
 | --- | --- | --- |
 | 中书省·拟令 | zhongshu-niling | 1 |
-| 门下封驳 | menxia-fengbo | 1 |
-| 尚书派单 | shangshu-paidan | 1 |
-| 六部执行 | liubu-zhixing | 2 |
-| 收尾结案 | shouwei-jiean | 2 |
-| 报错翻车 | baogao-cuowu | 1 |
-| 等待加载 | dengdai | 1 |
-| 庆祝通过 | qingzhu | 2 |
+| 门下封驳 | menxia-fengbo | 2 |
+| 尚书派单 | shangshu-paidan | 3 |
+| 六部执行 | liubu-zhixing | 3 |
+| 收尾结案 | shouwei-jiean | 3 |
+| 报错翻车 | baogao-cuowu | 2 |
+| 等待加载 | dengdai | 4 |
+| 庆祝通过 | qingzhu | 6 |
 | 问政司·提问 | wenzheng | 1 |
 
 ## 词表外标签（要修）

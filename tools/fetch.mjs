@@ -8,7 +8,7 @@ import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
 import { ROOT, parseArgs, fail } from "../lib/cli.mjs";
-import { loadConfig, readJson } from "../lib/kb.mjs";
+import { loadConfig, readJson, loadCatalog } from "../lib/kb.mjs";
 import { imageKind, EXT_OF_KIND } from "../lib/png.mjs";
 
 const ASSET_EXT = new Set([".png", ".jpg", ".jpeg", ".webp", ".gif"]);
@@ -85,6 +85,25 @@ if (!targets.length) fail(`未知 upstream。可选：${upstreams.map((u) => u.i
 const drafts = [];
 let total = 0;
 let failed = 0;
+// 草稿去重：已进正式 catalog 或已在草稿里的 id 不再重复追加。
+// 否则 tag 认领过的素材会在草稿里复活，CI 每天跑一次就把草稿越堆越长，报告里的「待打标」也不再可信。
+const catalogIds = new Set(loadCatalog(ROOT, cfg).map((e) => e.id));
+const draftIds = new Set(
+  fs.existsSync(path.join(ROOT, "manifest", "catalog.draft.jsonl"))
+    ? fs
+        .readFileSync(path.join(ROOT, "manifest", "catalog.draft.jsonl"), "utf8")
+        .split(/\r?\n/)
+        .filter(Boolean)
+        .map((l) => {
+          try {
+            return JSON.parse(l).id;
+          } catch {
+            return null;
+          }
+        })
+        .filter(Boolean)
+    : []
+);
 
 for (const up of targets) {
   const chain = forceRoute ? [forceRoute] : up.routes.filter((r) => routes[r]);
@@ -128,30 +147,42 @@ for (const up of targets) {
     }
     const out = path.join(ROOT, cfg.dataDir, "raw", up.id, ...rel.split("/"));
     try {
-      if (!fs.existsSync(out)) {
-        const buf = await download(f.url);
-        const kind = imageKind(buf);
-        if (kind === "unknown") {
-          console.error(`  ✗ ${rel} 不是可识别图片，跳过`);
-          continue;
-        }
+      // 本机已有的文件也要补草稿：以前只有「这次刚下载成功的」才写进草稿，
+      // 于是别的机器（CI）拉下来入库、或手工丢进 data/raw 的素材，
+      // 会永远卡在「文件在、目录里没有它」的状态，压图和配图都轮不到。
+      let buf;
+      if (fs.existsSync(out)) {
+        buf = fs.readFileSync(out);
+      } else {
+        buf = await download(f.url);
         fs.mkdirSync(path.dirname(out), { recursive: true });
         fs.writeFileSync(out, buf);
-        drafts.push({
-          id: `${up.id}/${rel.replace(/\.[^.]+$/, "")}`,
-          kind: kind === "gif" ? "gif" : "image",
-          status: "local",
-          file: path.relative(ROOT, out).split(path.sep).join("/"),
-          url: f.url,
-          bytes: buf.length,
-          sha256: crypto.createHash("sha256").update(buf).digest("hex"),
-          tags: {},
-          caption: "",
-          credit: up.credit,
-          license: up.license,
-          needsTagging: true,
-        });
       }
+      const kind = imageKind(buf);
+      if (kind === "unknown") {
+        console.error(`  ✗ ${rel} 不是可识别图片，跳过`);
+        continue;
+      }
+      const draftId = `${up.id}/${rel.replace(/\.[^.]+$/, "")}`;
+      if (catalogIds.has(draftId) || draftIds.has(draftId)) {
+        console.error(`  ⚠ ${draftId} 已在 catalog/草稿中，不再重复入草稿`);
+        continue;
+      }
+      draftIds.add(draftId);
+      drafts.push({
+        id: draftId,
+        kind: kind === "gif" ? "gif" : "image",
+        status: "local",
+        file: path.relative(ROOT, out).split(path.sep).join("/"),
+        url: f.url,
+        bytes: buf.length,
+        sha256: crypto.createHash("sha256").update(buf).digest("hex"),
+        tags: {},
+        caption: "",
+        credit: up.credit,
+        license: up.license,
+        needsTagging: true,
+      });
       total++;
     } catch (e) {
       failed++;

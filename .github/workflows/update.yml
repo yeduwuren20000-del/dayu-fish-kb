@@ -52,6 +52,6 @@ jobs:
         run: |
           git config user.name "dayu-fish-kb-bot"
           git config user.email "kb@localhost"
-          git add manifest/catalog.jsonl manifest/optimized.jsonl reports/status.md
+          git add manifest/catalog.jsonl manifest/catalog.draft.jsonl manifest/optimized.jsonl reports/status.md
           git diff --cached --quiet || git commit -m "chore: 定时更新 $(date -u +%Y-%m-%dT%H:%MZ)"
           git push
