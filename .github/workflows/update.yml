@@ -58,6 +58,9 @@ jobs:
         run: |
           node tests/kb.test.mjs
           node tests/optimize.test.mjs
+          # 检索页测试读的是生成出来的页面，所以先按当前数据生成一遍
+          node tools/gallery.mjs
+          node tests/gallery.test.mjs
 
       - name: 建索引
         run: node tools/build.mjs
@@ -68,10 +71,13 @@ jobs:
       - name: 生成报告
         run: node tools/report.mjs
 
+      - name: 生成检索页
+        run: node tools/gallery.mjs
+
       - name: 提交变更
         run: |
           git config user.name "dayu-fish-kb-bot"
           git config user.email "kb@localhost"
-          git add manifest/catalog.jsonl manifest/catalog.draft.jsonl manifest/optimized.jsonl reports/status.md
+          git add manifest/catalog.jsonl manifest/catalog.draft.jsonl manifest/optimized.jsonl reports/status.md web/index.html
           git diff --cached --quiet || git commit -m "chore: 定时更新 $(date -u +%Y-%m-%dT%H:%MZ)"
           git push

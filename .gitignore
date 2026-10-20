@@ -15,3 +15,6 @@ reports/daemon.log
 reports/logs/
 
 .DS_Store
+
+# 一次性体检/调试脚本
+_tmp_*

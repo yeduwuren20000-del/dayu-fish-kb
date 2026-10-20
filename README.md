@@ -49,7 +49,10 @@ npm run verify
 # 4) 配图
 npm run pick -- --scene 封驳 --n 2
 
-# 5) 一条命令跑完整流水线（拉新→压图→建索引→校验→报告）
+# 4.5) 想用人眼翻图：生成静态检索页，双击 web\index.html
+npm run gallery
+
+# 5) 一条命令跑完整流水线（拉新→压图→建索引→校验→报告→检索页）
 npm run job
 # 6) 接定时：用户态 daemon（不需要管理员）
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts\daemon.ps1
@@ -120,6 +123,7 @@ tools/
   doctor.mjs  seed.mjs  build.mjs  verify.mjs  pick.mjs  tag.mjs  fetch.mjs
   optimize.py             Pillow 压图（保留动图）+ 缩略图 + 侧车
   report.mjs              生成 reports/status.md 体检报告
+  gallery.mjs             生成 web/index.html 静态检索页（纯前端，双击打开）
 scripts/
   job.ps1                 无人值守流水线（fetch→optimize→build→verify→report→commit）
   schedule.ps1            计划任务安装/移除/查看（schtasks，需普通终端）
@@ -128,8 +132,10 @@ scripts/
 .github/workflows/update.yml  CI 侧 cron 定时任务
 tests/kb.test.mjs         14 条自测（检索/校验/近似去重/节点表）
 tests/optimize.test.mjs   7 条自测（优化版 overlay 与篡改守门）
+tests/gallery.test.mjs    7 条自测（拿 DOM 桩跑页面内联脚本，不依赖浏览器）
 data/opt/                 压过的 WebP（gitignore）
 data/thumb/               320px 缩略图（gitignore）
+web/index.html            检索页（gallery 生成，入库；本机缺图会回落上游 URL）
 reports/                  status.md / last-run.json / daemon.pid / daemon.log / logs/
 index/index.json          构建产物：标签倒排 + byId + 去重组
 ```
@@ -324,7 +330,7 @@ $ npm run pick -- --scene 结案 --n 2
 - [x] 近似去重：dHash 64bit（比 pHash 更省——纯 Python 十几行，不用 DCT/FFT），指纹进侧车，`build` 报组、`pick` 自动压
 - [x] `pick --node 报错` 这类「节点 → 场景」映射固化成 `manifest/node-map.json`，并在 `verify` 里校验表内词表
 - [x] CI 加 `push` 触发（只监听代码/配置路径，避开自触发），改了流水线能立刻知道在 CI 上跑不跑得过
-- [ ] 导出 `index.json` 的静态检索页（纯前端，无后端）
+- [x] 导出 `index.json` 的静态检索页（纯前端，无后端）：`npm run gallery` 生成 `web/index.html`，四维筛选 + 关键词 + 灯箱，近似重复默认折叠，双击即可打开
 - [ ] 与 DSH 侧 `sticker_pick` 对齐参数，避免两套调用约定
 - [ ] 自动打标：让模型读缩略图批量出候选标签，人工只做确认（现在 25 条全是手打的）
 
