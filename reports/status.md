@@ -1,16 +1,16 @@
 # 大肥鱼配图知识库 · 体检报告
 
-> 生成时间：2026-11-17T02:32:54.039Z　｜　自动生成，请勿手改（改 `tools/report.mjs`）
+> 生成时间：2026-11-18T01:39:48.655Z　｜　自动生成，请勿手改（改 `tools/report.mjs`）
 
 ## 总量
 
 - 条目 **25**（local 25 / remote 0）
 - 已打标 25，未打标 0
 - 标签桶 26，词表外标签 0
-- 优化版 292 条：142.00 MB → 21.19 MB，**省 85%**
+- 优化版 300 条：142.25 MB → 21.44 MB，**省 85%**
 - sha256 重复 1 组：fx-03-paidan = fx-05-dup-of-paidan
 - 近似重复（dHash）3 组：fx-02-fengbo ≈ fx-09-qingzhu; fx-03-paidan ≈ fx-05-dup-of-paidan ≈ fx-10-wenzheng; lmy414-ai-girl-stickers/assets/ai-nya-favicon-transparent ≈ lmy414-ai-girl-stickers/assets/ai-nya-favicon_20260915_140054_1
-- 草稿里还没打标的：267
+- 草稿里还没打标的：275
 
 ## 最重的 5 张（优化后）
 
